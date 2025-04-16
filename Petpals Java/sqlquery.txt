@@ -1,0 +1,133 @@
+-- 1
+USE petpals;
+
+-- 2,3,4 Qns.
+CREATE TABLE Pets (
+          PetID INT PRIMARY KEY AUTO_INCREMENT,
+          name VARCHAR(255) NOT NULL,
+          Age INT,
+          Breed VARCHAR(255),
+          Type VARCHAR(50),
+          AvailableForAdoption BIT DEFAULT 1
+      );
+CREATE TABLE Shelters (
+          ShelterID INT PRIMARY KEY AUTO_INCREMENT,
+          name VARCHAR(255) NOT NULL,
+          Location VARCHAR(255) NOT NULL
+      );
+CREATE TABLE Donations (
+          DonationID INT PRIMARY KEY AUTO_INCREMENT,
+          Donorname VARCHAR(255) NOT NULL,
+          DonationType VARCHAR(50),
+          DonationAmount DECIMAL(10,2),
+          DonationItem VARCHAR(255),
+          DonationDate DATETIME DEFAULT CURRENT_TIMESTAMP
+      );
+CREATE TABLE AdoptionEvents (
+          EventID INT PRIMARY KEY AUTO_INCREMENT,
+          Eventname VARCHAR(255) NOT NULL,
+          EventDate DATETIME NOT NULL,
+          Location VARCHAR(255) NOT NULL
+      );
+CREATE TABLE Participants (
+          ParticipantID INT PRIMARY KEY AUTO_INCREMENT,
+          Participantname VARCHAR(255) NOT NULL,
+          ParticipantType ENUM('Shelter', 'Adopter') NOT NULL,
+          EventID INT,
+          FOREIGN KEY (EventID) REFERENCES AdoptionEvents(EventID)
+      );
+      
+-- 5
+INSERT INTO Pets (name, Age, Breed, Type, AvailableForAdoption) VALUES
+    ('Rani', 5, 'Indian Spitz', 'Dog', 1),
+    ('Meera', 7, 'Siamese', 'Cat', 0),
+    ('Kabir', 4, 'Golden Retriever', 'Dog', 1);
+SELECT * FROM Pets WHERE AvailableForAdoption=1;  
+
+
+
+INSERT INTO Shelters (name, Location) VALUES
+    ('Hearts Animal Shelter', 'Kolkata'),
+    ('Blue Cross Society', 'Kochi'),
+    ('PAWS India', 'Bangalore');
+INSERT INTO Donations (Donorname, DonationType, DonationAmount, DonationItem, DonationDate) VALUES
+    ('Priya Sharma', 'Cash', 7500.00, NULL, NOW()),
+    ('Arjun Singh', 'Item', NULL, 'Cat Litter', NOW()),
+    ('Anika Patel', 'Cash', 4200.00, NULL, NOW());
+INSERT INTO AdoptionEvents (Eventname, EventDate, Location) VALUES
+    ('Annual Pet Adoption Fair', '2024-11-12 09:00:00', 'Mumbai'),
+    ('Community Animal Day', '2024-12-05 10:30:00', 'Hyderabad'),
+    ('Pawsitive Connections', '2025-01-15 11:00:00', 'Kochi');
+INSERT INTO Participants (ParticipantName, ParticipantType, EventID) VALUES
+    ('Vikram Aditya', 'Adopter', 3),
+    ('Kriti Sharma', 'Adopter', 1),
+    ('Praveen', 'Shelter', 2);
+
+select * from Participants;
+select * from Shelters;
+select * from Donations;
+select * from AdoptionEvents;
+select * from Pets;
+
+-- 6 Considering EventID = 2 
+SELECT Participants.ParticipantName, Participants.ParticipantType
+FROM Participants
+JOIN AdoptionEvents ON Participants.EventID = AdoptionEvents.EventID
+WHERE Participants.EventID = 2;
+
+-- 7
+UPDATE shelters
+SET NAME = 'new puppy takecare stop', location = 'Madurai'
+WHERE shelterid = 3;
+SELECT * FROM Shelters;
+
+-- 8
+SELECT shelters.name as NAMES, COALESCE(sum(donations.donationamount), 0) as Donation_Received
+FROM shelters
+LEFT JOIN donations on shelters.shelterid = donations.donationid
+GROUP BY shelters.name;
+      
+-- 11
+SELECT DISTINCT Breed
+FROM Pets
+WHERE (Age BETWEEN 1 AND 3) OR (Age > 5);
+
+-- 12
+SELECT Pets.name AS PetName, Shelters.name AS ShelterName
+FROM Pets
+JOIN Shelters ON Pets.AvailableForAdoption = 1;
+
+-- 13 as there is no chennai in input inserted so changed city to kochi
+SELECT COUNT(*) AS Total
+FROM Participants
+JOIN AdoptionEvents ON Participants.EventID = AdoptionEvents.EventID
+WHERE AdoptionEvents.Location = 'Kochi';
+
+-- 14
+SELECT DISTINCT Breed FROM Pets WHERE Age BETWEEN 1 AND 5;
+
+-- 15
+SELECT * FROM Pets WHERE AvailableForAdoption = 0;
+
+-- 17
+SELECT Shelters.name AS SName, COUNT(Pets.PetID) AS Pets
+FROM Shelters
+LEFT JOIN Pets ON Pets.AvailableForAdoption = 1
+GROUP BY Shelters.name;
+
+-- 18
+SELECT p1.name AS Pet1, p2.name AS Pet2, p1.Breed, s.name AS ShelterName
+FROM Pets p1
+JOIN Pets p2 ON p1.Breed = p2.Breed AND p1.PetID < p2.PetID
+JOIN Shelters s ON p1.AvailableForAdoption = 1 AND p2.AvailableForAdoption = 1;
+
+-- 19
+SELECT s.name AS ShelterName, e.Eventname AS EventName
+FROM Shelters s
+CROSS JOIN AdoptionEvents e;
+
+
+-- 20
+SELECT COUNT(*) AS TotalAdoptedPets 
+FROM Pets 
+WHERE AvailableForAdoption = 0;
